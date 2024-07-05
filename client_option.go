@@ -9,12 +9,11 @@ import (
 )
 
 const (
-	DefaultConnectTimeout    = 30 * time.Second
 	DefaultReconnectRetries  = 1
 	DefaultReconnectInterval = 3 * time.Second
 )
 
-func NewClientOption(server string, handler ClientHandler) (*ClientOption, error) {
+func NewClientOption(server string, handler ClientHandler, connecttimeout time.Duration) (*ClientOption, error) {
 	if len(server) > 0 && server[0] == ':' {
 		server = "127.0.0.1" + server
 	}
@@ -28,7 +27,7 @@ func NewClientOption(server string, handler ClientHandler) (*ClientOption, error
 	}
 	return &ClientOption{
 		server:         remoteURL,
-		connectTimeout: DefaultConnectTimeout,
+		connectTimeout: connecttimeout,
 		autoReconnectRule: &AutoReconnectRule{
 			retries:  DefaultReconnectRetries,
 			interval: DefaultReconnectInterval,

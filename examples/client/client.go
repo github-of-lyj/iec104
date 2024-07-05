@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	iec104 "github.com/github-of-lyj/iec104"
+	"github.com/github-of-lyj/iec104"
 	"github.com/sirupsen/logrus"
 )
 
@@ -69,7 +69,7 @@ func main() {
 	logger.SetLevel(logrus.DebugLevel)
 	iec104.SetLogger(logger)
 
-	option, err := iec104.NewClientOption(serverAddress, &handler{})
+	option, err := iec104.NewClientOption(serverAddress, &handler{}, 10*time.Second)
 	if err != nil {
 		panic(any(err))
 	}
