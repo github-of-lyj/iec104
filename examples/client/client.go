@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	iec104 "github.com/github-of-lyj/IEC104"
+	iec104 "github.com/github-of-lyj/iec104"
 	"github.com/sirupsen/logrus"
 )
 

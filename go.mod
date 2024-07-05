@@ -1,4 +1,4 @@
-module github.com/github-of-lyj/IEC104
+module github.com/github-of-lyj/iec104
 
 go 1.18
 
