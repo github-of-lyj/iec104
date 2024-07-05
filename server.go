@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"net"
+	"time"
 
 	"github.com/sirupsen/logrus"
 )
@@ -63,7 +64,7 @@ func (s *Server) listen() error {
 func (s *Server) serve(conn *Conn, handler ClientHandler) {
 	s.lg.Debugf("serve connection from %s", conn.RemoteAddr())
 	// TODO
-	option, _ := NewClientOption(s.address, handler)
+	option, _ := NewClientOption(s.address, handler, 10*time.Second)
 	client := NewClient(option)
 	ctx, cancel := context.WithCancel(context.Background())
 	client.cancel = cancel
