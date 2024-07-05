@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
+	iec104 "github.com/github-of-lyj/IEC104"
 	"github.com/sirupsen/logrus"
-	"github.com/yobol/go-iec104"
 )
 
 const (

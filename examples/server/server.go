@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 
+	iec104 "github.com/github-of-lyj/IEC104"
 	"github.com/sirupsen/logrus"
-	"github.com/yobol/go-iec104"
 )
 
 type handler struct{}
