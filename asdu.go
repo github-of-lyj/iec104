@@ -13,27 +13,28 @@ The ASDU contains two main sections:
   - defining the specific type of data;
   - providing addressing to identify the specific data;
   - including information as cause of transmission.
+
 - the data itself, made up of one or more information objects:
   - each ASDU can transmit maximum 127 objects;
   - the type identification is applied to the entire ASDU, so the information objects contained in the ASDU
     are of the same type.
 
 The format of ASDU:
- | <-              8 bits              -> |
- | Type Identification                    |  --------------------
- | SQ | Number of objects                 |           |
- | T  | P/N | Cause of transmission (COT) |           |
- | Original address (ORG)                 |  Data Uint Identifier
- | ASDU address fields                    |           |
- | ASDU address fields                    |  --------------------
- | Information object address (IOA)       |  --------------------
- | Information object address (IOA)       |           |
- | Information object address (IOA)       |  Information Object 1
- | Information Elements                   |           |
- | Time Tag                               |  --------------------
- | Information Object 2                   |
- | Information Object N                   |
 
+	| <-              8 bits              -> |
+	| Type Identification                    |  --------------------
+	| SQ | Number of objects                 |           |
+	| T  | P/N | Cause of transmission (COT) |           |
+	| Original address (ORG)                 |  Data Uint Identifier
+	| ASDU address fields                    |           |
+	| ASDU address fields                    |  --------------------
+	| Information object address (IOA)       |  --------------------
+	| Information object address (IOA)       |           |
+	| Information object address (IOA)       |  Information Object 1
+	| Information Elements                   |           |
+	| Time Tag                               |  --------------------
+	| Information Object 2                   |
+	| Information Object N                   |
 */
 type ASDU struct {
 	// Data Uint Identifier(with the fixed length of 6 bytes)
@@ -314,41 +315,41 @@ func (asdu *ASDU) parseTypeID(data byte) TypeID {
 
 /*
 SQ (Structure Qualifier, 1 bit) specifies how information objects or elements are addressed.
-- SQ=0 (false): each ASDU contains one or more than one equal information objects:
-  | <-              8 bits              -> |
-  | Type Identification              [1B]  | --------------------
-  | 0 | Number of objects            [7b]  |           |
-  | T | P/N | Cause of transmission  [6b]  | Data Unit Identifier
-  | Original address (ORG)           [1B]  |           |
-  | ASDU address fields              [2B]  | --------------------
-  | Information object address (IOA) [3B]  | --------------------
-  | Information Elements                   | Information Object 1
-  | Time Tag (if used)                     | --------------------
-  | Information object address (IOA) [3B]  | --------------------
-  | Information Elements                   | Information Object 2
-  | Time Tag (if used)                     | --------------------
-  | Information object address (IOA) [3B]  | --------------------
-  | Information Elements                   | Information Object N
-  | Time Tag (if used)                     | --------------------
-  | <-              SQ = 0              -> |
+  - SQ=0 (false): each ASDU contains one or more than one equal information objects:
+    | <-              8 bits              -> |
+    | Type Identification              [1B]  | --------------------
+    | 0 | Number of objects            [7b]  |           |
+    | T | P/N | Cause of transmission  [6b]  | Data Unit Identifier
+    | Original address (ORG)           [1B]  |           |
+    | ASDU address fields              [2B]  | --------------------
+    | Information object address (IOA) [3B]  | --------------------
+    | Information Elements                   | Information Object 1
+    | Time Tag (if used)                     | --------------------
+    | Information object address (IOA) [3B]  | --------------------
+    | Information Elements                   | Information Object 2
+    | Time Tag (if used)                     | --------------------
+    | Information object address (IOA) [3B]  | --------------------
+    | Information Elements                   | Information Object N
+    | Time Tag (if used)                     | --------------------
+    | <-              SQ = 0              -> |
   - the number of objects is binary coded (NumberOfObjects), and defines the number of the information objects;
   - each information object has its own information object address (IOA);
   - each single element or a combination of elements of object is addressed by the IOA.
   - [personal guess] SQ=0 is used to transmit a set of discontinuous values.
-- SQ=1  (true): each ASDU contains just one information object.
-  | <-              8 bits              -> |
-  | Type Identification              [1B]  | --------------------
-  | 1 | Number of objects            [7b]  |           |
-  | T | P/N | Cause of transmission  [6b]  | Data Unit Identifier
-  | Original address (ORG)           [1B]  |           |
-  | ASDU address fields              [2B]  | --------------------
-  | Information object address (IOA) [3B]  | --------------------
-  | Information Element 1                  |           |
-  | Information Element 2                  |           |
-  | Information Element 3                  | Information Object
-  | Information Element N                  |           |
-  | Time Tag (if used)                     | --------------------
-  | <-              SQ = 1              -> |
+  - SQ=1  (true): each ASDU contains just one information object.
+    | <-              8 bits              -> |
+    | Type Identification              [1B]  | --------------------
+    | 1 | Number of objects            [7b]  |           |
+    | T | P/N | Cause of transmission  [6b]  | Data Unit Identifier
+    | Original address (ORG)           [1B]  |           |
+    | ASDU address fields              [2B]  | --------------------
+    | Information object address (IOA) [3B]  | --------------------
+    | Information Element 1                  |           |
+    | Information Element 2                  |           |
+    | Information Element 3                  | Information Object
+    | Information Element N                  |           |
+    | Time Tag (if used)                     | --------------------
+    | <-              SQ = 1              -> |
   - the number of elements is binary coded (NumberOfObjects), and defines the number of the information elements;
   - there is just one information object address, which is the address of the first information element, the following
     information elements are identified by numbers continuous by +1 from this offset;
@@ -402,15 +403,19 @@ func (asdu *ASDU) parsePN(data byte) PN {
 /*
 COT (Cause of Transmission, 6 bits) is used to control message routing.
 - value range:
+
   - 0 is not defined!
+
   - 1-47 is used for standard IEC 101 definitions
+
   - 48-63 is for special use (private range)
 
-    - COT field is used to control the routing of messages both on the communication network, and within a station,
-      directing by ASDU to the correct program or task for processing. ASDUs in control direction are confirmed application
-      services and may be mirrored in monitor direction with different causes of transmission.
-    - COT is a 6-bit code which is used in interpreting the information at the destination station. Each defined ASDU
-      type has a defined subset of the codes which are meaningful with it.
+  - COT field is used to control the routing of messages both on the communication network, and within a station,
+    directing by ASDU to the correct program or task for processing. ASDUs in control direction are confirmed application
+    services and may be mirrored in monitor direction with different causes of transmission.
+
+  - COT is a 6-bit code which is used in interpreting the information at the destination station. Each defined ASDU
+    type has a defined subset of the codes which are meaningful with it.
 */
 type COT uint8
 
@@ -469,13 +474,13 @@ func (asdu *ASDU) parseCOT(data byte) COT {
 
 /*
 ORG (Originator Address, 1 byte) provides a method for a controlling station to explicitly identify itself.
-- The originator address is optional when there is only one controlling station in a system. If it is not used, all bits
-  are set to zero.
-- It is required when where is more than one controlling station, or some stations are dual-mode. In this case,
-  the address can be used to direct command confirmations back to the particular controlling station rather than to the
-  whole system.
-- If there is more than one single source in a system defined, the ASDUs in monitor direction have to be directed to
-  all relevant sources of the system. In this case the specific affected source has to select its specific ASDUs.
+  - The originator address is optional when there is only one controlling station in a system. If it is not used, all bits
+    are set to zero.
+  - It is required when where is more than one controlling station, or some stations are dual-mode. In this case,
+    the address can be used to direct command confirmations back to the particular controlling station rather than to the
+    whole system.
+  - If there is more than one single source in a system defined, the ASDUs in monitor direction have to be directed to
+    all relevant sources of the system. In this case the specific affected source has to select its specific ASDUs.
 
 TODO What's the differences between ORG and TCP endpoint (IP + PORT)? Can we identify the source by TCP endpoint?
 */
@@ -493,8 +498,8 @@ COA (Common Address of ASDU, 2 bytes) is normally interpreted as a station addre
   - 1-65534 means a station address;
   - 65535 means global address, and it is broadcast in control direction have to be answered in monitor direction by
     the address that is the specific defined common address (station address).
-- Global Address is used when the same application function must be initiated simultaneously. It's restricted to the
-  following ASDUs:
+  - Global Address is used when the same application function must be initiated simultaneously. It's restricted to the
+    following ASDUs:
   - TypeID = CIcNa1: replay with particular system data snapshot at common time
   - TypeID = CCiNa1: freeze totals at common time
   - TypeID = CCsNa1: synchronize clocks to common time

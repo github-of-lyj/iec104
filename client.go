@@ -19,6 +19,8 @@ func NewClient(option *ClientOption) *Client {
 		recvChan:   make(chan *APDU),
 		dataChan:   make(chan *APDU),
 		cmdRspChan: make(chan *cmdRsp, 0),
+		isExec:     false,
+		Signals:    make(map[IOA]float64),
 	}
 }
 
@@ -39,6 +41,9 @@ type Client struct {
 	ifn      uint16 // i-format frame number (for send S-frame data regularity)
 
 	status int32 // initial, connected, disconnected
+
+	isExec  bool
+	Signals map[IOA]float64
 }
 
 func (c *Client) Connect() error {
@@ -116,6 +121,7 @@ func (c *Client) readingFromSocket(ctx context.Context) {
 					switch uFrame.Cmd[0] {
 					case UFrameFunctionStartDTA[0]:
 						_lg.Debugf("receive u frame: StartDTA")
+						c.sendUFrame(UFrameFunctionStartDTC)
 					case UFrameFunctionStartDTC[0]:
 						_lg.Debugf("receive u frame: StartDTC")
 						c.recvChan <- apdu
@@ -132,6 +138,11 @@ func (c *Client) readingFromSocket(ctx context.Context) {
 						c.sendUFrame(UFrameFunctionTestFC)
 					}
 				}
+			case FrameTypeI:
+				if !c.isExec {
+					c.SendTestFrame()
+				}
+				c.isExec = false
 			}
 		}
 	}
@@ -175,7 +186,9 @@ func (c *Client) handleData(apdu *APDU) error {
 	}()
 
 	_lg.Debugf("handle iFrame: TypeID: %X, COT: %X", apdu.ASDU.typeID, apdu.ASDU.cot)
-
+	for _, Signal := range apdu.Signals {
+		c.Signals[Signal.Address] = Signal.Value
+	}
 	switch apdu.typeID {
 	case CIcNa1:
 		return c.handler.GeneralInterrogationHandler(apdu)
@@ -236,6 +249,7 @@ func (c *Client) readApduBody(apduLen uint8) (*APDU, error) {
 
 	switch apdu.frame.Type() {
 	case FrameTypeI:
+		c.incRsn()
 		if apdu.ASDU.cmdRsp != nil {
 			c.cmdRspChan <- apdu.ASDU.cmdRsp
 		}
@@ -245,10 +259,7 @@ func (c *Client) readApduBody(apduLen uint8) (*APDU, error) {
 		if apdu.ASDU.sendSFrame {
 			c.SendTestFrame()
 		}
-
-		c.incRsn()
 	}
-
 	return apdu, nil
 }
 
@@ -282,6 +293,22 @@ func (c *Client) SendGeneralInterrogation() {
 		nObjs:  NOO(len(ios)),
 		t:      false,
 		cot:    CotAct,
+		ios:    ios,
+	})
+}
+
+func (c *Client) SendReadCommand(ioa IOA) {
+	ios := []*InformationObject{
+		{
+			ioa: ioa,
+		},
+	}
+	c.SendIFrame(&ASDU{
+		typeID: CRdNa1,
+		sq:     false,
+		nObjs:  NOO(len(ios)),
+		t:      false,
+		cot:    CotReq,
 		ios:    ios,
 	})
 }
@@ -454,6 +481,7 @@ func (c *Client) sendIFrame(apci *IFrame, asdu *ASDU) {
 }
 
 func (c *Client) SendTestFrame() {
+	c.isExec = true
 	c.sendSFrame(&SFrame{
 		RecvSN: c.rsn,
 	})
@@ -486,11 +514,18 @@ func (c *Client) sendUFrame(x UFrameFunction) {
 }
 
 func (c *Client) buildFrame(data []byte) []byte {
+	// fmt.Println("---------")
 	frame := make([]byte, 0, 0)
+	// fmt.Println(frame)
 	iBytes := serializeBigEndianUint16(uint16(len(data)))
+	// fmt.Println(iBytes)
 	frame = append(frame, startByte)
+	// fmt.Println(frame)
 	frame = append(frame, iBytes[1])
+	// fmt.Println(frame)
 	frame = append(frame, data...)
+	// fmt.Println(frame)
+	// fmt.Println("---------")
 	return frame
 }
 

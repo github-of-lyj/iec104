@@ -2,6 +2,7 @@ package iec104
 
 import (
 	"crypto/tls"
+	"fmt"
 	"net/url"
 	"strings"
 	"time"
@@ -9,8 +10,8 @@ import (
 
 const (
 	DefaultConnectTimeout    = 30 * time.Second
-	DefaultReconnectRetries  = 0
-	DefaultReconnectInterval = 1 * time.Minute
+	DefaultReconnectRetries  = 1
+	DefaultReconnectInterval = 3 * time.Second
 )
 
 func NewClientOption(server string, handler ClientHandler) (*ClientOption, error) {
@@ -20,6 +21,7 @@ func NewClientOption(server string, handler ClientHandler) (*ClientOption, error
 	if !strings.Contains(server, "://") {
 		server = "tcp://" + server
 	}
+	fmt.Println(server)
 	remoteURL, err := url.Parse(server)
 	if err != nil {
 		return nil, err

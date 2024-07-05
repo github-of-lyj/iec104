@@ -1,15 +1,18 @@
 package iec104
 
 import (
+	"context"
 	"crypto/tls"
-	"github.com/sirupsen/logrus"
 	"net"
+
+	"github.com/sirupsen/logrus"
 )
 
-func NewServer(address string, tc *tls.Config) *Server {
+func NewServer(address string, tc *tls.Config, lg *logrus.Logger) *Server {
 	return &Server{
 		address: address,
 		tc:      tc,
+		lg:      lg,
 	}
 }
 
@@ -22,11 +25,10 @@ type Server struct {
 	lg *logrus.Logger
 }
 
-func (s *Server) Serve() error {
+func (s *Server) Serve(handler ClientHandler) error {
 	if err := s.listen(); err != nil {
 		return err
 	}
-
 	defer s.listener.Close()
 	for {
 		conn, err := s.listener.Accept()
@@ -37,7 +39,7 @@ func (s *Server) Serve() error {
 
 		go s.serve(&Conn{
 			conn,
-		})
+		}, handler)
 	}
 }
 func (s *Server) listen() error {
@@ -58,10 +60,27 @@ func (s *Server) listen() error {
 	}
 	return nil
 }
-func (s *Server) serve(conn *Conn) {
+func (s *Server) serve(conn *Conn, handler ClientHandler) {
 	s.lg.Debugf("serve connection from %s", conn.RemoteAddr())
-
 	// TODO
+	option, _ := NewClientOption(s.address, handler)
+	client := NewClient(option)
+	ctx, cancel := context.WithCancel(context.Background())
+	client.cancel = cancel
+	client.conn = conn
+	//用于发送数据
+	go client.writingToSocket(ctx)
+	//用于接收数据
+	go client.readingFromSocket(ctx)
+
+	// var readData = []byte{}
+	// for {
+	// 	conn.Read(readData)
+	// 	s.lg.Printf("读取到的数据：" + string(readData))
+	// 	readData = nil
+	// 	time.Sleep(2 * time.Second)
+	// }
+
 }
 
 type Conn struct {

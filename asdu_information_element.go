@@ -274,7 +274,7 @@ func (asdu *ASDU) parseInformationElement(data []byte, ie *InformationElement) {
 	case MMeTc1:
 		ie.getIEEESTD754()
 		ie.getQDS()
-		ie.getIEEESTD754()
+		ie.getCP24Time2a()
 		switch asdu.cot {
 		default:
 			_lg.Debugf("receive i frame: short floating point value with quality descriptor without time tag "+
