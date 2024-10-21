@@ -24,6 +24,21 @@ func NewClient(option *ClientOption) *Client {
 	}
 }
 
+func NewClientWithCoaAddress(option *ClientOption, coaAddress COA) *Client {
+	return &Client{
+		ClientOption: option,
+		org:          ORG(0),
+		coa:          coaAddress,
+
+		sendChan:   make(chan []byte, 1),
+		recvChan:   make(chan *APDU),
+		dataChan:   make(chan *APDU),
+		cmdRspChan: make(chan *cmdRsp, 0),
+		isExec:     false,
+		Signals:    make(map[IOA]float64),
+	}
+}
+
 // Client in IEC 104 is also called as master or controlling station.
 type Client struct {
 	*ClientOption

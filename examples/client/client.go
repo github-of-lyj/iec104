@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	serverAddress = "192.168.23.129:2404"
+	serverAddress = "127.0.0.1:2404"
 )
 
 type handler struct{}
@@ -73,24 +73,27 @@ func main() {
 	if err != nil {
 		panic(any(err))
 	}
-	client := iec104.NewClient(option)
+	client := iec104.NewClientWithCoaAddress(option, iec104.COA(0x0002))
+	// client := iec104.NewClient(option)
 	if err := client.Connect(); err != nil {
 		panic(any(err))
 	}
 	defer client.Close()
-
 	// go func() {
-	// 	time.Sleep(5 * time.Second)
-	// 	client.SendTestFrame()
+	// 	for {
+	// 		time.Sleep(5 * time.Second)
+	// 		for i := 0; i < 128*16; i++ {
+	// 			client.SendReadCommand(0x000001)
+	// 		}
+	// 	}
+
 	// }()
 
 	go func() {
-		// for {
-		// 	time.Sleep(1 * time.Second)
-		// 	client.SendReadCommand(0x000001)
-		// }
-		// time.Sleep(1 * time.Second)
-		// client.SendReadCommand(0x000001)
+		for {
+			time.Sleep(1 * time.Second)
+			client.SendReadCommand(0x000001)
+		}
 
 	}()
 
