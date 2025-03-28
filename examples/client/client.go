@@ -73,7 +73,7 @@ func main() {
 	if err != nil {
 		panic(any(err))
 	}
-	client := iec104.NewClientWithCoaAddress(option, iec104.COA(0x0002))
+	client := iec104.NewClientWithCoaAddress(option, iec104.COA(1))
 	// client := iec104.NewClient(option)
 	if err := client.Connect(); err != nil {
 		panic(any(err))
@@ -92,7 +92,8 @@ func main() {
 	go func() {
 		for {
 			time.Sleep(1 * time.Second)
-			client.SendReadCommand(0x000001)
+			client.SendGeneralInterrogation()
+			client.SendCounterInterrogation()
 		}
 
 	}()

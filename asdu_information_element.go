@@ -121,7 +121,7 @@ func (ie *InformationElement) getQDS() {
 // https://github.com/wireshark/wireshark/blob/master/epan/dissectors/packet-iec104.c#L2605
 func (ie *InformationElement) getBCR() {
 	ie.Format = append(ie.Format, BCR)
-	ie.Value = float64(parseLittleEndianUint32(ie.data[ie.offset : ie.offset+4])) // data[4] is the description information.
+	ie.Value = float64(parseLittleEndianUint32(ie.data[ie.offset:ie.offset+4])) * 0.01 // data[4] is the description information.
 
 	ie.offset += 5
 }
