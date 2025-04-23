@@ -8,6 +8,10 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// const (
+// 	serverAddress = "172.28.148.5:2406"
+// )
+
 const (
 	serverAddress = "127.0.0.1:2404"
 )
@@ -91,9 +95,10 @@ func main() {
 
 	go func() {
 		for {
-			time.Sleep(1 * time.Second)
-			client.SendGeneralInterrogation()
+			// client.SendGeneralInterrogation()
 			client.SendCounterInterrogation()
+			time.Sleep(120 * time.Second)
+
 		}
 
 	}()

@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"sync"
 )
 
 func NewClient(option *ClientOption) *Client {
@@ -57,8 +58,9 @@ type Client struct {
 
 	status int32 // initial, connected, disconnected
 
-	isExec  bool
-	Signals map[IOA]float64
+	isExec       bool
+	Signals      map[IOA]float64
+	SignalsMutex sync.Mutex
 }
 
 func (c *Client) Connect() error {
@@ -199,6 +201,10 @@ func (c *Client) handleData(apdu *APDU) error {
 			_lg.Errorf("client handler: %+v", err)
 		}
 	}()
+
+	// 加锁
+	c.SignalsMutex.Lock()
+	defer c.SignalsMutex.Unlock()
 
 	_lg.Debugf("handle iFrame: TypeID: %X, COT: %X", apdu.ASDU.typeID, apdu.ASDU.cot)
 	for _, Signal := range apdu.Signals {
