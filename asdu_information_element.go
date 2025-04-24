@@ -314,6 +314,10 @@ func (asdu *ASDU) parseInformationElement(data []byte, ie *InformationElement) {
 			_lg.Debugf("receive i frame: response of counter interrogation at %d is %f [%s]"+
 				"[总电度响应]", ie.Address, ie.Value, ie.Ts)
 			asdu.toBeHandled = true
+		case CotInrogen:
+			_lg.Debugf("receive i frame: response of counter interrogation at %d is %f [%s]"+
+				"[总电度响应]", ie.Address, ie.Value, ie.Ts)
+			asdu.toBeHandled = true
 		}
 	case MSpTb1:
 		ie.getSIQ()

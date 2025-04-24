@@ -95,9 +95,9 @@ func main() {
 
 	go func() {
 		for {
-			// client.SendGeneralInterrogation()
-			client.SendCounterInterrogation()
-			time.Sleep(120 * time.Second)
+			client.SendGeneralInterrogation()
+			// client.SendCounterInterrogation()
+			time.Sleep(20 * time.Second)
 
 		}
 
