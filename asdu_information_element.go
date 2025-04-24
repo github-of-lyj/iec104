@@ -305,6 +305,10 @@ func (asdu *ASDU) parseInformationElement(data []byte, ie *InformationElement) {
 			_lg.Debugf("receive i frame: response of counter interrogation at %d is %f "+
 				"[总电度响应]", ie.Address, ie.Value)
 			asdu.toBeHandled = true
+		case CotInrogen:
+			_lg.Debugf("receive i frame: response of counter interrogation at %d is %f "+
+				"[总电度响应]", ie.Address, ie.Value)
+			asdu.toBeHandled = true
 		}
 	case MItTa1:
 		ie.getBCR()
