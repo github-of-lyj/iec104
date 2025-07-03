@@ -83,25 +83,24 @@ func main() {
 		panic(any(err))
 	}
 	defer client.Close()
-	// go func() {
-	// 	for {
-	// 		time.Sleep(5 * time.Second)
-	// 		for i := 0; i < 128*16; i++ {
-	// 			client.SendReadCommand(0x000001)
-	// 		}
-	// 	}
-
-	// }()
-
 	go func() {
 		for {
-			client.SendGeneralInterrogation()
-			// client.SendCounterInterrogation()
-			time.Sleep(5 * time.Second)
+			client.SendReadCommand(25601)
+			time.Sleep(10 * time.Second)
 
 		}
 
 	}()
+
+	// go func() {
+	// 	for {
+	// 		// client.SendGeneralInterrogation()
+	// 		// client.SendCounterInterrogation()
+	// 		time.Sleep(5 * time.Second)
+
+	// 	}
+
+	// }()
 
 	// go func() {
 	// 	for {

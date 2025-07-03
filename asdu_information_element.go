@@ -301,6 +301,14 @@ func (asdu *ASDU) parseInformationElement(data []byte, ie *InformationElement) {
 	case MItNa1:
 		ie.getBCR()
 		switch asdu.cot {
+		case CotSpont:
+			_lg.Debugf("receive i frame: response of counter interrogation at %d is %f [%s]"+
+				"[自发突变]", ie.Address, ie.Value, ie.Ts)
+			asdu.toBeHandled = true
+		case CotReq:
+			_lg.Debugf("receive i frame: response of counter interrogation at %d is %f [%s]"+
+				"[请求]", ie.Address, ie.Value, ie.Ts)
+			asdu.toBeHandled = true
 		case CotReqcogen:
 			_lg.Debugf("receive i frame: response of counter interrogation at %d is %f "+
 				"[总电度响应]", ie.Address, ie.Value)
